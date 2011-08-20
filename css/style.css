@@ -1,0 +1,31 @@
+#window {
+  border: 2px solid black;
+  margin: 20px auto;
+  position: relative;
+  overflow: hidden;
+  cursor: none;
+}
+
+#window * {
+  position: absolute;
+}
+
+.debug #window * {
+  border: red 1px solid;
+}
+
+#player {
+  background: transparent url(../img/player.gif) center center no-repeat;
+  height: 32px;
+  width: 32px;
+}
+
+.playerProjectile {
+  background: transparent url(../img/player.gif) center center no-repeat;
+  height: 32px;
+  width: 32px;
+}
+
+.enemyShip {
+  
+}
