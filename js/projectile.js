@@ -1,6 +1,7 @@
 var Projectile = Element.$extend({ // abstract class
   __classvars__ : {
     all : [],
+    removeMargin : 100
   },
   
   __init__ : function(x, y, dx, dy, opt) {
@@ -12,16 +13,15 @@ var Projectile = Element.$extend({ // abstract class
   update : function() {  
     this.$super();
     
-    // TODO: If projectile goes off-screen, call this.remove();
+    // If projectile goes off-screen, remove it.
+    if (this.x < 0 - Projectile.removeMargin ||
+        this.x > g.gameWidth + Projectile.removeMargin ||
+        this.y < 0 - Projectile.removeMargin ||
+        this.y > g.gameHeight + Projectile.removeMargin) {
+
+      this.remove(Projectile.all);
+    }
   },
-  
-  remove : function() {
-    $.grep(Projectile.all, function(e) {
-      return e !== this;
-    });
-    
-    this.$super();
-  }
   
 });
 

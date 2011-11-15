@@ -9,7 +9,7 @@ var Game = Class.$extend({
   __classvars__ : {
     width : 600,
     height : 800,
-    fps: 45, // gameplay fps
+    fps: 60, // gameplay fps
     showStats : true,
   },
   
@@ -33,31 +33,40 @@ var Game = Class.$extend({
 
     this.player = Player();
     this.keyboard = Keyboard();
+    this.mouse = Mouse();
     
     var run = (function() {
-      var loops, now,
+      var loops, now, delta,
           skipTicks = 1000 / Game.fps,
           maxFrameSkip = 10,
           nextGameTick = (new Date).getTime(),
           requestAnimFrame = window.requestAnimFrame,
           element = this.gameWindow;
     
+      // Main game loop
       return function loop() {
         loops = 0;
-        now = (new Date).getTime();
+        now = window.mozAnimationStartTime || (new Date).getTime();
         
-        while (now > nextGameTick) { // it's time for an update
+        while (now > nextGameTick) { // it's time for a game update
           if (loops > maxFrameSkip) {
-            console.log("frame skipped");
+            // Skip game tick -- BAD!
+            // Should only happen on slow CPUs.
+            break;
           }
           self.update();
           nextGameTick += skipTicks;
           loops += 1;
         }
         
-        // TODO: do not render frame when deltaT is too high
-        //       if ( deltaT < 160 ) { maybe pause the game, too          
-        self.draw(1 - ((nextGameTick - now) / skipTicks));
+        // only draw if delta is low, otherwise we were probably
+        // focused on another tab.
+        delta = now - nextGameTick - skipTicks;
+        if (delta < 160) {
+          self.draw(1 - ((nextGameTick - now) / skipTicks));
+        } else {
+          // TODO: maybe pause the game, too
+        }
         
         requestAnimFrame(loop, element);
       };
@@ -72,14 +81,14 @@ var Game = Class.$extend({
   },
   
   /**
-   * Update the game state by one tick. (We update at 30fps.)
+   * Update the game state by one tick. (We update at 50fps.)
    *
    * We advance the state of the game world at a constant rate, so that weird
    * performance glitches won't affect the gameplay.
    */
   update : function() {
-    $.map(Projectile.all, function(p) { p.update(); });
-    $.map(Enemy.all, function(e) { e.update(); });
+    _.map(Projectile.all, function(p) { p.update(); });
+    _.map(Enemy.all, function(e) { e.update(); });
     this.player.update();
         
     // If stats are enabled, update the game fps.
@@ -99,8 +108,8 @@ var Game = Class.$extend({
    * and a factor of 0.5 means that we're halfway between two frames.
    */
   draw : function(interpolation) {
-    $.map(Projectile.all, function(p) { p.draw(interpolation); });
-    $.map(Enemy.all, function(e) { e.draw(interpolation); });
+    _.map(Projectile.all, function(p) { p.draw(interpolation); });
+    _.map(Enemy.all, function(e) { e.draw(interpolation); });
     this.player.draw(interpolation);
     
     // If stats are enabled, update the draw fps.
@@ -120,17 +129,6 @@ var Keyboard = Class.$extend({
     $(window).keyup(function(e) {
       self.handleKeyDownUp(e, false);
     });
-    
-    // $(window).keypress(function(e) {
-    //   var key = e.keyCode;
-    //   console.log(key);
-    //   if (key == 68) { // D
-    //     $('html').toggleClass('debug');
-    //   } else {
-    //     return;
-    //   }
-    //   e.preventDefault();
-    // });
   },
   
   handleKeyDownUp : function(e, isDown) {
@@ -155,6 +153,41 @@ var Keyboard = Class.$extend({
     e.preventDefault();
   },
   
+});
+
+var Mouse = Class.$extend({
+  __init__ : function() {
+    var self = this;
+    
+    this.x = 0;
+    this.y = 0;
+    
+    var offsetTop = $(g.gameWindow).offset().top;
+    var offsetLeft = $(g.gameWindow).offset().left;
+    
+    $(g.gameWindow).mousemove(function(e) {
+      self.x = e.pageX - offsetLeft;
+      self.y = e.pageY - offsetTop;
+    
+    }).mousedown(function(e) {
+      self.handleMouseDownUp(e, true);
+      
+    }).mouseup(function(e) {
+      self.handleMouseDownUp(e, false);
+    });
+  },
+  
+  handleMouseDownUp : function(e, isDown) {
+    var which = e.which;
+    
+    if (which == 1) {
+      this.button1 = isDown;
+    } else if (which == 2) {
+      this.button2 = isDown;
+    } else if (which == 3) {
+      this.button3 = isDown;
+    }
+  }
 });
 
 

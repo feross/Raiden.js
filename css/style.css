@@ -1,8 +1,19 @@
+html {
+  /* Disable text selection */
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  user-select: none;
+}
+
 #window {
   border: 2px solid black;
   margin: 20px auto;
   position: relative;
   overflow: hidden;
+  
+  /* No ugly mouse pointer */
   cursor: none;
 }
 
@@ -27,5 +38,7 @@
 }
 
 .enemyShip {
-  
+  background: transparent url(../img/player.gif) center center no-repeat;
+  height: 32px;
+  width: 32px;
 }
